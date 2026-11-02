@@ -89,7 +89,9 @@ function validateState(state){
  return next;
 }
 export function validateBackup(payload){
- safeTree(payload);require(object(payload)&&payload.format==='olympia-friends-backup','No es un respaldo de Olympia amigos.');require(payload.formatVersion===1&&payload.databaseVersion===2&&payload.databaseName==='olympia-friends','Versión de respaldo o de base de datos no compatible.');require(object(payload.records)&&Object.keys(payload.records).length===BACKUP_STORES.length,'Colecciones del respaldo incompletas o desconocidas.');
+ safeTree(payload);require(object(payload),'No es un respaldo de Olympia.');
+ const legacy=payload.format==='heavy-duty-backup'&&payload.databaseName==='heavy-duty-personal',native=payload.format==='olympia-friends-backup'&&payload.databaseName==='olympia-friends';
+ require(legacy||native,'No es un respaldo compatible de Olympia.');require(payload.formatVersion===1&&payload.databaseVersion===2,'Versión de respaldo o de base de datos no compatible.');require(object(payload.records)&&Object.keys(payload.records).length===BACKUP_STORES.length,'Colecciones del respaldo incompletas o desconocidas.');
  const records=structuredClone(payload.records);
  for(const store of BACKUP_STORES){require(Array.isArray(records[store]),`Falta la colección ${store}.`);const keys=new Set();for(const entry of records[store]){require(object(entry)&&(typeof entry.key==='string'||typeof entry.key==='number')&&object(entry.value),'Registro de respaldo no válido.');require(!keys.has(entry.key),`Claves duplicadas en ${store}.`);keys.add(entry.key);if(store!=='app')require(typeof entry.value.id==='string'&&entry.key===entry.value.id,`ID no válido en ${store}.`);}}
  const raw=records.app.find(row=>row.key==='state')?.value;require(raw,'Falta el estado principal.');const state=validateState(raw),rows=Object.fromEntries(collections.map(key=>[key,records[key].map(row=>row.value)]));
@@ -101,7 +103,7 @@ export function validateBackup(payload){
  for(const entry of records.sessionRevisions)require(sessionValid(entry.value.session),'Versión histórica de sesión no válida.');
  require(new Set(rows.sessions.map(row=>row.date)).size===rows.sessions.length,'Hay sesiones duplicadas para una fecha.');
  verifyProjection(raw,rows);const restored=hydrateCollections(state,rows);verifyProjection(restored,projectCollections(restored,rows.sessions));
- return {records,state:restored,counts:{sessions:rows.sessions.length,series:restored.logs.length,cardio:restored.cardio.length,journal:Object.keys(restored.journal).length,measurements:restored.measurements.length,monthlyReviews:restored.monthlyReviews?.length??0,monthlyChecks:restored.monthlyChecks?.length??0,checkPhotos:photos.size},version:payload.formatVersion};
+ return {records,state:restored,source:legacy?'personal':'olympia',counts:{sessions:rows.sessions.length,series:restored.logs.length,cardio:restored.cardio.length,journal:Object.keys(restored.journal).length,measurements:restored.measurements.length,monthlyReviews:restored.monthlyReviews?.length??0,monthlyChecks:restored.monthlyChecks?.length??0,checkPhotos:photos.size},version:payload.formatVersion};
 }
 const identity=row=>object(row)&&typeof row.id==='string'?`id:${row.id}`:`value:${JSON.stringify(row)}`;
 // Current values win collisions; imported fields and distinct IDs are retained.

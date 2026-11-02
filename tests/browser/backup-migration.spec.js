@@ -1,0 +1,24 @@
+import {test,expect} from './fixtures.js';
+import {personalBackup} from '../fixtures/personal-backup.js';
+import {go} from './navigation-helpers.js';
+import {readFile} from 'node:fs/promises';
+test('importación personal: cancelar conserva destino; confirmar y reexportar conserva todos los datos y fotos offline',async({page,context})=>{
+ await page.clock.install({time:new Date('2031-01-01T18:00:00Z')});await page.goto('./');await go(page,'Ajustes');
+ const jpeg=await page.evaluate(()=>document.createElement('canvas').toDataURL('image/jpeg'));
+ const file=personalBackup(jpeg);await page.locator('.backup-panel summary').click();
+ await page.getByLabel('Archivo de respaldo',{exact:true}).setInputFiles({name:'personal-ficticio.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(file))});
+ await expect(page.locator('.backup-panel')).toContainText('40 sesiones · 762 series');await expect(page.locator('.backup-panel')).toContainText('6 fotos');
+ await page.getByLabel('Modo de importación',{exact:true}).selectOption('replace');
+ const snapshot=()=>page.evaluate(async()=>{const db=await new Promise(resolve=>{const r=indexedDB.open('olympia-friends');r.onsuccess=()=>resolve(r.result);});return new Promise(resolve=>{const r=db.transaction('app').objectStore('app').get('state');r.onsuccess=()=>{db.close();resolve(r.result);};});});
+ const before=await snapshot();page.removeAllListeners('dialog');page.on('dialog',d=>d.dismiss());await page.getByRole('button',{name:'Reemplazar con este respaldo',exact:true}).click();expect(await snapshot()).toEqual(before);
+ page.removeAllListeners('dialog');page.on('dialog',d=>d.accept());await page.getByRole('button',{name:'Reemplazar con este respaldo',exact:true}).click();await expect(page.locator('.simple-home')).toBeVisible();
+ await page.evaluate(async()=>{await navigator.serviceWorker.ready;});await context.setOffline(true);await page.reload();await go(page,'Ajustes');
+ const event=page.waitForEvent('download');await page.locator('.backup-panel').getByRole('button',{name:'Exportar mis datos',exact:true}).click();const exported=JSON.parse(await readFile(await(await event).path(),'utf8'));
+ const original=file.records.app[0].value,after=exported.records.app.find(r=>r.key==='state').value;
+ for(const key of ['routine','profiles','personalProfile','profileHistory','logs','sessionMeta','cardio','dailySteps','journal','measurements','monthlyChecks','meals'])expect(after[key],key).toEqual(original[key]);
+ for(const row of file.records.app.filter(r=>r.key!=='state'))expect(exported.records.app.find(r=>r.key===row.key)).toEqual(row);
+ expect(exported.records.sessions).toEqual(file.records.sessions);expect(exported.records.sessionRevisions).toEqual(file.records.sessionRevisions);
+ expect(exported.records.migrationBackups).toEqual(expect.arrayContaining(file.records.migrationBackups));
+ const archived=exported.records.migrationBackups.find(r=>r.value.kind==='import-source');for(const key of Object.keys(file.records).filter(k=>k!=='migrationBackups'))expect(archived.value.records[key]).toEqual(file.records[key]);
+ await go(page,'Historial');await expect(page.locator('main')).toContainText('40 entrenamientos');
+});
