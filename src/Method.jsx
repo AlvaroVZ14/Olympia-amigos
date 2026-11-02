@@ -2,7 +2,7 @@ const sections = [
   {
     title: 'Filosofía',
     summary: 'Alta intensidad, técnica y recuperación.',
-    content: <><p>Método de alta intensidad: ejecución limpia, progresión y recuperación. Elige una plantilla en Ajustes → Rutina y adáptala a tu experiencia. No hay afiliación con deportistas, entrenadores ni marcas.</p><p>Prioriza los músculos que tengan sentido para tu objetivo, sin ignorar la recuperación. Las plantillas son puntos de partida, no prescripciones individuales.</p><p>Trabaja a 0–2 RIR: termina cuando calcules que quedan de cero a dos repeticiones con buena técnica. Controla la excéntrica durante 2–3 segundos. El fallo técnico es el límite; no sacrifiques la forma.</p></>,
+    content: <><p>Método de alta intensidad: ejecución limpia, progresión y recuperación. Elige una plantilla en Ajustes → Rutina y adáptala a tu experiencia. No hay afiliación con deportistas, entrenadores ni marcas.</p><p>En la plantilla PPL + Torso + Leg, las prioridades Classic Physique son pecho superior, dorsales, bíceps, cuádriceps, glúteos y femorales. Son información de la plantilla y se adaptan a cada persona.</p><p>Prioriza los músculos que tengan sentido para tu objetivo, sin ignorar la recuperación. Las plantillas son puntos de partida, no prescripciones individuales.</p><p>Trabaja a 0–2 RIR: termina cuando calcules que quedan de cero a dos repeticiones con buena técnica. Controla la excéntrica durante 2–3 segundos. El fallo técnico es el límite; no sacrifiques la forma.</p></>,
   },
   {
     title: 'Tipos de serie',

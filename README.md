@@ -1,18 +1,14 @@
-# Olympia · edición amigos
+﻿# Olympia
 
-PWA privada de entrenamiento. Sin cuentas, backend, analytics ni rastreadores.
-Cada instalación empieza sin perfil, pesos, medidas, fases, fotos ni entrenamientos.
-El onboarding guarda sus datos exclusivamente en IndexedDB del dispositivo.
+Una app para todos. Cada persona guarda sus datos exclusivamente en su dispositivo
+(IndexedDB). Sin cuentas, backend de datos, analytics ni rastreadores.
+Cada instalación empieza vacía y pasa por el onboarding.
 
-Esta edición vive en la rama **version-amigos**. No debe integrarse en `main`
-del repositorio personal ni desplegarse sobre su sitio. Su alojamiento independiente
-es **https://alvarovz14.github.io/Olympia-amigos/**, en el repositorio limpio
-**AlvaroVZ14/Olympia-amigos**. Cada push de código a `version-amigos` en ese
-repositorio prueba y publica mediante GitHub Actions. En el repositorio original
-el workflow solo verifica; nunca modifica la web personal.
+**Web/PWA:** https://alvarovz14.github.io/Olympia-amigos/
 
-[Configuración, comandos, migraciones y checklist en celular](docs/publicar-amigos.md).
-Dentro de la app: **Ajustes → Ayuda / Instalar** y **Ajustes → Acerca de**.
+**Repositorio único:** AlvaroVZ14/Olympia-amigos.
+**Carpeta de trabajo:** Olympia-amigos-publicacion. **Rama principal:** main.
+Las carpetas anteriores quedan históricas hasta confirmar la migración real.
 
 ## Ejecutar
 
@@ -21,76 +17,77 @@ npm ci
 npm run dev
 ```
 
-Abre `http://localhost:5173/Olympia-amigos/`. Para revisar el paquete de producción:
+Abre http://localhost:5173/Olympia-amigos/.
+Producción: `npm run build` y `npm run preview`.
+Ayuda / Instalar y el número de versión están en Ajustes.
+
+## Cómo cambiar algo y publicarlo: cinco comandos
+
+Desde esta carpeta, con GitHub CLI autenticado y las referencias actualizadas:
 
 ```powershell
-npm run build
-npm run preview
+git switch -c cambio/descripcion origin/main
+npm version patch --no-git-tag-version
+git commit -am "Describe el cambio"
+git push -u origin HEAD
+gh pr create --base main --fill
 ```
 
-La instalación y el uso offline necesitan HTTPS o localhost y una primera carga
-con conexión. El manifest y el service worker usan rutas relativas a esta edición.
+Edita después del primer comando. Usa minor para funciones, major para cambios
+incompatibles y patch para correcciones. Añade archivos nuevos con `git add ruta`
+antes del commit. Antes del push: `npm test`, `npm run build`, `npm run test:e2e`.
+Revisa el PR y pulsa **Squash and merge** cuando sus comprobaciones aprueben.
+Antes de otro cambio: `git fetch origin`; usa un nombre de rama nuevo.
+
+Un único workflow verifica PRs y publica cada push a main, después de aprobar
+pruebas, compilación y pruebas en navegador. Exige versión semántica creciente.
+Cambiar almacenamiento/esquema/importación exige actualizar pruebas de migración.
+No se publica desde otras ramas. No se usa el repositorio personal para cambios nuevos.
 
 ## Rutinas
 
-En **Ajustes → Rutina** puedes elegir Full Body 3 días, Torso/Pierna 4,
-PPL + Torso + Leg 5 o Push/Pull/Legs 6. La plantilla de cinco días es la
-predeterminada, sin pesos personales. Las otras son puntos de partida generales.
-Puedes añadir, quitar y reordenar ejercicios, cambiar músculo, equipo, carga,
-series, rango por serie, Top/Back-off, Drop y RP. Drop y RP se aplican dentro de
-la última serie y no aumentan el volumen. El volumen semanal se recalcula.
-Guarda para aplicar; los borradores se recuperan y el historial no se borra.
-Termina una sesión abierta antes de sustituir su rutina.
+Ajustes → Rutina: PPL + Torso + Leg 5 días, Full Body 3, Torso/Pierna 4 y PPL 6.
+Puedes cambiar ejercicios, orden, músculo, series, reps, técnicas y descansos.
+Drop y RP son extensiones de la última serie y no aumentan el volumen.
+El volumen semanal se calcula; editar no borra el historial.
 
-## Datos y respaldo
+## Datos y migración
 
-**Ajustes → Configuración**: Exportar mis datos, Importar datos (combinar o
-reemplazar) y Borrar todo. El JSON incluye las fotos e historial y debe guardarse
-en un lugar privado. La importación valida antes de cambiar datos. El borrado
-requiere confirmación y afecta solo a la base `olympia-friends` y sus claves
-`olympia-friends-*`; no lee, migra ni borra la base de la edición personal.
-No hay sincronización automática entre celulares ni envío de registros.
+Ajustes → Configuración → **Exportar mis datos / Importar datos**.
+El JSON incluye perfil, rutina, pesos, sesiones/series, descansos, cardio, diario,
+comidas, medidas, fases, checks, fotos y archivos internos de recuperación.
+No subas ese archivo al repositorio ni lo envíes para solicitar soporte.
 
-El sitio incluye `noindex, nofollow`; esto no es autenticación ni protege una
-URL compartida. Los datos no están incluidos en la página pública.
+Importar acepta Olympia y respaldos de la app personal anterior (formato 1,
+base 2). Valida, muestra cantidades y pide confirmación. Combinar conserva lo local
+en coincidencias; Reemplazar sustituye la instalación tras el aviso explícito.
+Ambos conservan copias internas del destino anterior y del origen.
+Una transacción fallida no reemplaza nada.
 
-## Comentarios
+[Comparación, prueba y pasos para migrar](docs/unificacion.md).
 
-El botón **Enviar comentarios** está en Configuración y abre un mensaje a
-`alvaro.valdes@alumnos.ucn.cl`, dirección autorizada para este fin. Puedes cambiarla
-con la variable pública `VITE_FEEDBACK_EMAIL` al compilar:
+El aviso **Hay una versión nueva · Actualizar** guarda series y borradores
+antes de activar el worker; nunca borra IndexedDB. Se conservan enlace, scope,
+y base olympia-friends para quienes ya instalaron Olympia.
 
-```powershell
-$env:VITE_FEEDBACK_EMAIL = 'correo-a-configurar@example.org'
-npm run build
-```
+## Futuras migraciones
 
-No incluyas claves en variables `VITE_*`: pasan al navegador. Este correo será
-visible en el código público. El botón abre el cliente de correo, sin adjuntar
-datos automáticamente. Sin dirección configurada explica que aún está pendiente.
+`src/schema.js`: versión JSON. `STATE_MIGRATIONS` en domain.js exige pasos
+consecutivos y rechaza versiones futuras. `dbMigrations.js`: stores e índices.
+Aumentar versiones requiere migración y pruebas con fixtures ficticios.
+Prueba ida/vuelta, fotos, errores y rollback, manteniendo respaldos antiguos.
 
-## Acerca de
+## Privacidad y comentarios
 
-Accesible desde Ajustes en el menú. Los cálculos y sugerencias son orientativos,
-no reemplazan a un médico o nutricionista. Las personas con condiciones médicas
-deben consultar antes de empezar. Dieta y déficit se recomiendan para mayores
-de 18 años; el cálculo de calorías requiere edad adulta.
+Se retiró el correo personal predeterminado. **Enviar comentarios** queda
+preparado: configura VITE_FEEDBACK_EMAIL con un buzón aparte antes de compilar.
+El correo será público en el navegador. Un formulario externo permite ocultar
+el destino; no se adjuntan datos automáticamente. Nunca pongas secretos en VITE_*.
+Los commits antiguos pueden conservar la dirección anterior: no se reescribió Git.
 
-## Recursos y revisión
+Borrar todo requiere confirmación y afecta solo a esta instalación. noindex no
+es autenticación. Portada/logo SVG propios; fuentes locales con licencias OFL.
+Sin afiliación con deportistas o entrenadores. Cálculos orientativos, no atención
+médica. Consulta a un profesional si tienes una condición médica.
 
-La portada es un SVG genérico propio (`public/hero-generic.svg`), sin fotos ni
-semejanzas solicitadas con personas reales. El emblema existente es vectorial
-propio. Las fuentes locales Anton y Barlow mantienen sus licencias OFL en
-`src/assets/fonts` y `public/licencias`. No se afirma afiliación con marcas o entrenadores.
-
-[Informe de auditoría y entrega](docs/version-amigos.md).
-[Auditoría de la web publicada](docs/publicacion/README.md).
-
-La eliminación de archivos en esta rama no borra el historial Git previo. Para
-compartir únicamente el código saneado, usa un ZIP de esta rama o un repositorio
-nuevo creado desde ese ZIP, sin copiar `.git`. La rama personal queda intacta.
-
-```powershell
-npm test
-npm run test:e2e
-```
+[Instalación y auditoría PWA](docs/publicar-amigos.md).
