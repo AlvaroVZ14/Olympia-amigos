@@ -1,0 +1,31 @@
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.jsx';
+import './styles.css';
+import './wellness.css';
+import './program/program.css';
+import './training.css';
+import './history.css';
+import './navigation.css';
+import './fonts.css';
+import './theme.css';
+import './motivation.css';
+import './stage.css';
+import './effects.css';
+import './sides.css';
+import './gym.css';
+import './safety-cardio.css';
+import './grunge.css';
+import './quick-register.css';
+import './simple-interface.css';
+import './performance.css';
+import './brand.css';
+import './workout-deck.css';
+import './series-cards.css';
+import './rest-timer.css';
+import './workout-premium.css';
+import './profile.css';
+
+createRoot(document.getElementById('root')).render(<App />);
+
+import './friends.css';

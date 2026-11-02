@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {initialState,migrateState} from '../src/domain.js';
+import {measurementRatios,measurementReminder,measurementStats,migrateMeasurements,previousMonth,validateMeasurement,waistWarning} from '../src/measurements.js';
+const record=(date,values)=>({id:date,date,values});
+const baseline={id:'fictional',date:'2030-04-02',initial:true,values:{biceps:30,forearm:27,waist:80,chest:96,thigh:53,calf:33}};
+test('instalación vacía y migración sin precargas ni pérdida de registros',()=>{const state=initialState();assert.deepEqual(state.measurements,[]);assert.deepEqual(state.phases,[]);assert.equal(migrateState(state),state);const original={...state,schemaVersion:3,measurements:[baseline]},next=migrateMeasurements(original);assert.deepEqual(next.measurements,[baseline]);delete original.measurements;assert.deepEqual(migrateMeasurements(original).measurements,[]);});
+test('medidas parciales comparan con anterior e inicial sin rellenar datos',()=>{const rows=[baseline,record('2030-04-16',{biceps:31}),record('2030-04-30',{biceps:31.5})],stats=measurementStats(rows,'2030-04-30');assert.equal(stats[0].previousChange,.5);assert.equal(stats[0].initialChange,1.5);assert.equal(stats[1].value,27);assert.equal(stats[1].previousChange,null);assert.equal(measurementRatios(rows,'2030-04-30')[0].value,96/80);});
+test('recordatorio desde el primer registro real mantiene intervalo de 14 días',()=>{assert.deepEqual(measurementReminder([baseline],'2030-04-02'),{due:false,date:'2030-04-16'});assert.equal(measurementReminder([baseline],'2030-04-16').due,true);assert.equal(measurementReminder([],'2030-04-16').due,true);});
+test('aviso de cintura requiere más de un cm y un mes observable',()=>{assert.equal(waistWarning([baseline,record('2030-05-02',{waist:81})],'2030-05-02'),null);assert.ok(waistWarning([baseline,record('2030-05-02',{waist:81.2})],'2030-05-02'));assert.equal(previousMonth('2028-03-31'),'2028-02-29');});
+test('validación mantiene medidas desconocidas y rechaza ceros',()=>{const values={biceps:30,forearm:null,waist:null,chest:null,thigh:null,calf:null};assert.equal(validateMeasurement(record('2030-04-02',values)),null);assert.ok(validateMeasurement(record('2030-02-30',values)));assert.ok(validateMeasurement(record('2030-04-02',{...values,biceps:0})));});

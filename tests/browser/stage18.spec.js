@@ -1,0 +1,29 @@
+import {editNumber,confirmSet,expectNumber} from './fast-helpers.js';
+import {test,expect,go,chooseDate} from './fixtures.js';
+async function stored(page){return page.evaluate(async()=>{const db=await new Promise(resolve=>{const req=indexedDB.open('olympia-friends');req.onsuccess=()=>resolve(req.result);});return new Promise(resolve=>{const tx=db.transaction('app','readonly'),req=tx.objectStore('app').get('state');tx.oncomplete=()=>{db.close();resolve(req.result);};});});}
+async function orientation(page,beta,gamma){await page.evaluate(({beta,gamma})=>{const event=new Event('deviceorientation');Object.assign(event,{beta,gamma});dispatchEvent(event);},{beta,gamma});}
+
+test('fuego solo en márgenes, ráfagas acotadas y menor presupuesto al registrar',async({page})=>{
+  await page.clock.install({time:new Date('2026-10-12T15:00:00Z')});await page.setViewportSize({width:1920,height:1080});await page.goto('./');await go(page,'Ajustes');await expect(page.locator('h1:visible')).toBeVisible();const fire=page.getByTestId('ember-field');await expect(fire).toHaveAttribute('data-particles','200');
+  const before=await stored(page);for(let i=0;i<5;i++)await page.mouse.click(120,700);
+  await expect.poll(()=>fire.evaluate(el=>Number(el.dataset.bursts))).toBeGreaterThan(0);expect(await fire.evaluate(el=>Number(el.dataset.particles))).toBeLessThanOrEqual(240);expect(await stored(page)).toEqual(before);
+  const pixels=await fire.evaluate(el=>{const ctx=el.getContext('2d'),ratio=el.width/innerWidth;return {center:ctx.getImageData(Math.floor(el.width/2),Math.floor(el.height*.9),1,1).data[3],edge:ctx.getImageData(Math.floor(150*ratio),Math.floor((innerHeight-30)*ratio),1,1).data[3]};});expect(pixels.center).toBe(0);expect(pixels.edge).toBeGreaterThan(0);
+  await page.screenshot({path:'test-results/p18-fire-desktop.png'});
+  await go(page,'Hoy');await editNumber(page,'Press banca',100);await expect(fire).toHaveCount(0);
+});
+
+test('descanso: hoy, miércoles, domingo, editor y calendario sin días fijos',async({page})=>{
+  test.setTimeout(60000);await page.clock.install({time:new Date('2026-10-14T15:00:00Z')});await page.goto('./');await go(page,'Hoy');const card=page.getByTestId('rest-card');await expect(card).toContainText('Hoy toca descansar.');await expect(card).toContainText('mañana (jueves): Hombro + Brazo');
+  await chooseDate(page,'2026-10-18');await expect(card).toContainText('Este día es de descanso.');await expect(card).toContainText('mañana (lunes): Pecho + Hombro + Bíceps');
+  await chooseDate(page,'2026-10-14');await go(page,'Rutina');await page.getByRole('button',{name:'Jue',exact:true}).click();
+  for(let i=0;i<7;i++){await page.locator('.friends-exercise-toggle').first().click();await page.getByRole('button',{name:'Quitar ejercicio',exact:true}).click();}
+  await page.getByRole('button',{name:'Guardar rutina',exact:true}).click();await expect(page.getByRole('status')).toBeVisible();await go(page,'Hoy');await expect(card).toContainText('el viernes: Pierna');
+  await chooseDate(page,'2026-10-16');await page.locator('summary').filter({hasText:'Tipo de día y hora de entrenamiento'}).click();await page.getByLabel('Tipo de día',{exact:true}).selectOption('rest');await page.getByRole('button',{name:'Guardar calendario',exact:true}).click();await chooseDate(page,'2026-10-14');await expect(card).toContainText('el sábado: Torso');
+  await page.clock.setSystemTime(new Date('2026-10-15T15:00:00Z'));await chooseDate(page,'2026-10-16');await expect(card).toContainText('Mañana toca descansar.');
+  await page.clock.setSystemTime(new Date('2026-10-16T15:00:00Z'));await chooseDate(page,'2026-10-14');await expect(card).toContainText('Este día es de descanso.');
+  await page.setViewportSize({width:390,height:844});await card.screenshot({path:'test-results/p18-rest-mobile.png'});
+});
+
+test('computador sin sensor: no ofrece inclinación aunque exista la API',async({page})=>{
+  await page.addInitScript(()=>{window.sensorRequests=0;window.DeviceOrientationEvent=class extends Event{static async requestPermission(){window.sensorRequests++;return 'granted';}};});await page.goto('./');await expect(page.getByRole('button',{name:'Activar inclinación'})).toHaveCount(0);expect(await page.evaluate(()=>window.sensorRequests)).toBe(0);
+});
