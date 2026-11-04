@@ -32,7 +32,7 @@ test('cierre antes de confirmar persistencia recupera la operación sin duplicar
 });
 test('inicio se recupera, y una técnica incompleta nunca se publica ni entra en la cola',async()=>{
  const h=harness(),start=h.queue.begin(date,now);assert.equal(h.queue.getState().gymSession.date,date);h.start();await start;
- const ex=h.saved().routine[1][2];for(let i=0;i<2;i++){const save=h.queue.confirm(ex,date,i,{weight:40,reps:10},now+i*105000);h.start();await save;}
+ const ex=h.saved().routine[1][2];ex.technique='drop';ex.setPlan.at(-1).technique='drop';for(let i=0;i<2;i++){const save=h.queue.confirm(ex,date,i,{weight:40,reps:10},now+i*105000);h.start();await save;}
  assert.throws(()=>h.queue.confirm(ex,date,2,{weight:40,reps:10,technique:'drop',extensions:[{weight:30,reps:null}]},now+210000),/Completa/);
  assert.equal(h.queue.pending(),0);assert.equal(h.saved().logs.length,2);
 });
