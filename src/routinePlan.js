@@ -35,35 +35,35 @@ function exercise(session,key,name,muscle,sets,equipment,loadType='isolation',te
 }
 export function createRoutinePlan(){
   const e=exercise;
-  const torsoCurl=e('TORSO','curl-mancuerna','Curl mancuerna','Bíceps',5,'dumbbell');
+  const torsoCurl=e('TORSO','curl-bayesian','Curl bayesian','Bíceps',5,'cable');
   torsoCurl.setPlan=Array.from({length:5},(_,index)=>({role:index<3?'heavy':'light',repMin:index<3?6:12,repMax:index<3?10:15,technique:''}));
   const routine=[[],[
     e('PUSH','press-inclinado','Press inclinado mancuernas','Pecho',4,'dumbbell','heavy','',true),
     e('PUSH','press-banca','Press banca','Pecho',2,'barbell','heavy','',true),
-    e('PUSH','aperturas-polea','Aperturas en polea','Pecho',3,'cable','isolation','drop'),
-    e('PUSH','laterales-mancuerna','Elevaciones laterales mancuerna','Deltoides laterales',2,'dumbbell','isolation','rp'),
+    e('PUSH','aperturas-polea','Aperturas en polea','Pecho',3,'cable','isolation','rp'),
     e('PUSH','laterales-polea','Elevaciones laterales polea','Deltoides laterales',2,'cable'),
     e('PUSH','triceps-tras-nuca','Extensión tríceps tras nuca','Tríceps',2,'cable','isolation','drop'),
+    e('PUSH','laterales-mancuerna','Elevaciones laterales mancuerna','Deltoides laterales',2,'dumbbell','isolation','drop'),
     e('PUSH','fondos','Fondos','Pecho',2,'bodyweight','compound'),
   ],[
-    e('PULL','curl-polea','Curl polea','Bíceps',3,'cable'),
+    e('PULL','curl-bayesian','Curl bayesian','Bíceps',3,'cable'),
     e('PULL','dominadas','Dominadas','Espalda',3,'bodyweight','heavy','drop'),
     e('PULL','remo-libre','Remo libre','Espalda',2,'barbell','heavy'),
-    e('PULL','remo-mancuerna','Remo mancuerna','Espalda',2,'dumbbell','heavy'),
+    e('PULL','remo-polea','Remo en polea','Espalda',2,'cable','heavy','drop'),
     e('PULL','jalon-pecho','Jalón al pecho','Espalda',3,'cable','heavy','drop'),
-    e('PULL','posterior-maquina','Deltoides posterior','Deltoides posteriores',2,'machine','isolation','drop'),
-    e('PULL','curl-mancuerna','Curl mancuerna','Bíceps',2,'dumbbell'),
+    e('PULL','posterior-polea','Deltoides posterior polea','Deltoides posteriores',2,'cable','isolation','rp'),
+    e('PULL','curl-polea','Curl polea','Bíceps',2,'cable'),
   ],[
     e('LEG A','extensiones','Extensiones de cuádriceps','Cuádriceps',2,'machine','isolation','drop'),
     e('LEG A','hack-squat','Hack squat','Cuádriceps',3,'machine','heavy','',true),
     e('LEG A','femoral-sentado','Femoral sentado','Femorales',4,'machine'),
-    e('LEG A','hiper-gluteos','Hiperextensiones (glúteos)','Glúteos',2,'barbell','compound'),
     e('LEG A','aductores','Aductores máquina','Aductores',2,'machine'),
+    e('LEG A','hiper-gluteos','Hiperextensiones (glúteos)','Glúteos',2,'barbell','compound'),
     e('LEG A','soleo','Sóleo máquina','Gemelos',2,'machine'),
     e('LEG A','crunch-disco','Crunch con disco','Abdomen',2,'barbell'),
   ],[],[
     e('TORSO','press-inclinado','Press inclinado mancuernas','Pecho',3,'dumbbell','heavy','',true),
-    e('TORSO','jalon-pecho','Jalón al pecho','Espalda',2,'cable','heavy'),
+    e('TORSO','jalon-pecho','Jalón al pecho','Espalda',2,'cable','heavy','drop'),
     e('TORSO','remo-polea','Remo en polea','Espalda',1,'cable','heavy','drop'),
     torsoCurl,
     e('TORSO','laterales-polea','Elevaciones laterales polea','Deltoides laterales',2,'cable','isolation','drop'),
@@ -72,10 +72,10 @@ export function createRoutinePlan(){
   ],[
     e('LEG B','prensa-unilateral','Prensa unilateral','Cuádriceps',3,'machine','heavy'),
     e('LEG B','gemelo-prensa','Gemelo en prensa','Gemelos',2,'machine'),
-    e('LEG B','hack-squat','Hack squat','Cuádriceps',2,'machine','heavy','',true),
-    e('LEG B','femoral-pie','Femoral de pie','Femorales',2,'machine','isolation','drop'),
-    e('LEG B','hiper-gluteos','Hiperextensiones (glúteos)','Glúteos',2,'barbell','compound'),
+    e('LEG B','hack-squat','Hack squat','Cuádriceps',2,'machine','heavy','drop',true),
+    e('LEG B','femoral-sentado','Femoral sentado','Femorales',2,'machine','isolation','drop'),
     e('LEG B','abductores','Abductores máquina','Abductores',4,'machine'),
+    e('LEG B','hiper-gluteos','Hiperextensiones (glúteos)','Glúteos',2,'barbell','compound'),
     e('LEG B','crunch-disco','Crunch con disco','Abdomen',2,'barbell'),
   ]];
   // Repeated movements share reference weights, not their per-day instance IDs.

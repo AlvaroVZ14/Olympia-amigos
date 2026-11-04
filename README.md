@@ -51,6 +51,15 @@ Puedes cambiar ejercicios, orden, músculo, series, reps, técnicas y descansos.
 Drop y RP son extensiones de la última serie y no aumentan el volumen.
 El volumen semanal se calcula; editar no borra el historial.
 
+La revisión 2 de PPL incorpora curl bayesian, remos y posterior en polea,
+femoral sentado en ambos días y el nuevo orden/técnicas. Conserva 7 ejercicios
+y 17 series por sesión, 85 semanales. El curl bayesian de Torso mantiene tres
+pesadas (6–10) y dos ligeras (12–15); el Drop de Hack en LEG B va en el Back-off final.
+Para aplicar a una instalación existente: Ajustes → Rutina → PPL + Torso + Leg
+→ Cargar plantilla → revisar → Guardar rutina. No se impone a rutinas guardadas
+ni se alteran otras plantillas. El historial se conserva y se reutilizan pesos
+solo cuando coinciden nombre y equipo; las variantes nuevas piden su propia carga.
+
 ## Datos y migración
 
 Ajustes → Configuración → **Exportar mis datos / Importar datos**.

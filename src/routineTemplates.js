@@ -1,7 +1,7 @@
 import {makeExercise,validateRoutine} from './domain.js';
 import {createRoutinePlan,ROUTINE_VERSION} from './routinePlan.js';
 
-export const TEMPLATES=[{id:'ppl-torso-leg',name:'PPL + Torso + Leg',days:5,description:'5 días · 85 series · plantilla avanzada'},
+export const TEMPLATES=[{id:'ppl-torso-leg',name:'PPL + Torso + Leg',days:5,description:'5 días · 85 series · revisión 2: curl bayesian y femoral sentado'},
  {id:'full-body',name:'Full Body',days:3,description:'Lunes, miércoles y viernes · cuerpo completo'},
  {id:'upper-lower',name:'Torso / Pierna',days:4,description:'Lunes, martes, jueves y viernes'},
  {id:'ppl-six',name:'Push / Pull / Legs',days:6,description:'Lunes a sábado · descanso el domingo'}];

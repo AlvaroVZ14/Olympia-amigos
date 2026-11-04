@@ -20,14 +20,14 @@ test('descanso automático sobrevive recarga y cerrar barra; es tiempo entre con
  assert.equal(state.logs[0].restRealSeconds,178);assert.equal(state.logs[0].restMeasurement,'between-confirmations');assert.equal(state.logs[1].restRealSeconds,null);
 });
 test('drop reduce30%, se guarda dentro de última efectiva en la misma operación y no añade volumen',()=>{
- let state=initialState();const ex=state.routine[1][2];assert.equal(dropWeight(ex,100),70);assert.equal(dropWeight(ex,100,1),50);
+ let state=initialState();const ex=state.routine[1][2];ex.technique='drop';ex.setPlan.at(-1).technique='drop';assert.equal(dropWeight(ex,100),70);assert.equal(dropWeight(ex,100,1),50);
  for(let index=0;index<2;index++)state=confirmQuickSet(state,ex,date,index,{weight:100,reps:10},time+index*105000);
  const before=structuredClone(state);assert.throws(()=>confirmQuickSet(state,ex,date,2,{weight:100,reps:10,technique:'drop',extensions:[{weight:70,reps:null}]},time+210000),/Completa/);assert.deepEqual(state,before);
  state=confirmQuickSet(state,ex,date,2,{weight:100,reps:10,technique:'drop',extensions:[{weight:70,reps:6}]},time+210000);
  assert.equal(state.logs.length,4);assert.equal(state.logs.at(-1).parentId,state.logs.at(-2).id);assert.equal(state.timer.duration,105);assert.equal(weeklyVolume(state,date).find(row=>row.muscle==='Pecho').done,3);
 });
 test('RP registra dos mini-series vinculadas sin exigir otro formulario y descarga impide técnicas',()=>{
- let state=initialState();const ex=state.routine[1][3];state=confirmQuickSet(state,ex,date,0,{weight:20,reps:15},time);
+ let state=initialState();const ex=state.routine[1][3];ex.technique='rp';ex.setPlan.at(-1).technique='rp';state=confirmQuickSet(state,ex,date,0,{weight:20,reps:15},time);
  state=confirmQuickSet(state,ex,date,1,{weight:20,reps:14,technique:'rp',extensions:[{weight:20,reps:4},{weight:20,reps:3}]},time+105000);
  assert.equal(state.logs.filter(row=>row.kind==='effective').length,2);assert.equal(state.logs.filter(row=>row.kind==='rp').length,2);assert.equal(state.timer.duration,105);
  const deload=initialState();deload.deloads=[{startDate:date,endDate:date}];assert.throws(()=>confirmQuickSet(deload,{...ex,sets:1,deload:true},date,0,{weight:20,reps:12,technique:'rp',extensions:[]},time),/descarga/);

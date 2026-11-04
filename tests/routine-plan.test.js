@@ -24,13 +24,13 @@ test('PPL exacto: cinco días, siete ejercicios y 17 efectivas por sesión, 85 e
  assert.equal(new Set(routine.flat().map(ex=>ex.id)).size,35);assert.equal(validateRoutine(routine),null);
  assert.ok(routine.flat().every(ex=>!ex.forced&&!ex.negative&&ex.setPlan.length===ex.sets));
  const seenProfiles=new Set();for(const ex of routine.flat()){if(seenProfiles.has(ex.profileId))continue;seenProfiles.add(ex.profileId);const profile=state.profiles[ex.profileId];assert.equal(profile.targetReps,ex.setPlan[0].repMin);assert.equal(profile.repMin,ex.setPlan[0].repMin);assert.equal(profile.repMax,ex.setPlan[0].repMax);}
- assert.deepEqual(routine.map(day=>day.map(ex=>ex.sets)),[[],[4,2,3,2,2,2,2],[3,3,2,2,3,2,2],[2,3,4,2,2,2,2],[],[3,2,1,5,2,2,2],[3,2,2,2,2,4,2]]);
+ assert.deepEqual(routine.map(day=>day.map(ex=>ex.sets)),[[],[4,2,3,2,2,2,2],[3,3,2,2,3,2,2],[2,3,4,2,2,2,2],[],[3,2,1,5,2,2,2],[3,2,2,2,4,2,2]]);
 });
 
 test('rangos por carga/músculo y curl TORSO 3 pesadas + 2 ligeras, sin confundir equipo',()=>{
  const routine=createRoutinePlan();
  for(const ex of routine.flat())for(const [index,entry] of ex.setPlan.entries()){
-  const range=ex.routineSession==='TORSO'&&ex.name==='Curl mancuerna'?(index<3?[6,10]:[12,15]):ex.muscle==='Abdomen'?[10,20]:['Deltoides laterales','Gemelos'].includes(ex.muscle)?[12,20]:ex.compound?[6,10]:[8,15];
+  const range=ex.routineSession==='TORSO'&&ex.name==='Curl bayesian'?(index<3?[6,10]:[12,15]):ex.muscle==='Abdomen'?[10,20]:['Deltoides laterales','Gemelos'].includes(ex.muscle)?[12,20]:ex.compound?[6,10]:[8,15];
   assert.deepEqual([entry.repMin,entry.repMax],range,`${ex.routineSession}: ${ex.name} ${index+1}`);
  }
  assert.deepEqual(routine[5][3].setPlan.map(row=>row.role),['heavy','heavy','heavy','light','light']);
@@ -62,7 +62,7 @@ test('Back-off/Ligera se guardan separadas sin contaminar referencia usada por p
 });
 
 test('drop/RP solo en última efectiva, sin convertir cada caída/mini-serie en volumen',()=>{
- for(const exerciseIndex of [2,3]){
+ for(const exerciseIndex of [2,4]){
   let state=initialState();const ex=state.routine[1][exerciseIndex],kind=ex.technique;
   assert.ok(['drop','rp'].includes(kind));
   assert.deepEqual(ex.setPlan.map((_,index)=>effectiveSetPlan(ex,index).technique),Array.from({length:ex.sets},(_,index)=>index===ex.sets-1?kind:''));
@@ -93,8 +93,8 @@ test('reutilización segura de pesos; variantes, equipo distinto y coincidencias
  const next=migrateRoutinePlan(old),find=name=>next.routine.flat().find(ex=>ex.name===name);
  assert.equal(find('Press banca').profileId,old.routine[0][0].profileId);assert.equal(next.profiles[find('Press banca').profileId].workWeight,77);
  assert.equal(find('Press inclinado mancuernas').profileId,old.routine[0][2].profileId);
- for(const name of ['Prensa unilateral','Femoral sentado','Femoral de pie','Hiperextensiones (glúteos)','Jalón al pecho','Dominadas','Deltoides posterior'])assert.equal(next.profiles[find(name).profileId].workWeight,null,name);
- assert.notEqual(find('Curl mancuerna').profileId,old.routine[0][7].profileId);
+ for(const name of ['Prensa unilateral','Femoral sentado','Hiperextensiones (glúteos)','Jalón al pecho','Dominadas','Deltoides posterior polea'])assert.equal(next.profiles[find(name).profileId].workWeight,null,name);
+ assert.notEqual(find('Curl bayesian').profileId,old.routine[0][7].profileId);
  const ambiguous=structuredClone(old),copy={...ambiguous.routine[0][0],id:'other',profileId:'other-profile'};ambiguous.routine[0].push(copy);ambiguous.profiles[copy.profileId]={workWeight:200};
  const resolved=migrateRoutinePlan(ambiguous),bench=resolved.routine[1][1];assert.equal(resolved.profiles[bench.profileId].workWeight,null);
  const wrongEquipment=structuredClone(old);wrongEquipment.routine[0][0].equipment='machine';assert.equal(migrateRoutinePlan(wrongEquipment).profiles[bench.profileId].workWeight,null);
